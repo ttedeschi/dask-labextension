@@ -1,0 +1,3 @@
+   REFRESH(1 sec): http://localhost:8888/lab?token=00ef3f518ad0ec30720e2adb4224b7bcbf7d576c738f1ee0
+
+   This page should redirect you to a Jupyter application. If it doesn't, click here to go to Jupyter.

@@ -256,7 +256,7 @@ export function showScalingDialog(
   };
 
   return showDialog({
-    title: `Scale ${model.name}`,
+    title: `Scale dciangot 30 ${model.name}`,
     body: (
       <ClusterScaling initialModel={model} stateEscapeHatch={escapeHatch} />
     ),

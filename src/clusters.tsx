@@ -2,7 +2,9 @@ import {
   showErrorMessage,
   Toolbar,
   ToolbarButton,
-  CommandToolbarButton
+  CommandToolbarButton,
+  Dialog, 
+  showDialog
 } from '@jupyterlab/apputils';
 
 import { IChangedArgs, URLExt } from '@jupyterlab/coreutils';
@@ -444,7 +446,7 @@ export class DaskClusterManager extends Widget {
     this._isReady = false;
     this._registry.notifyCommandChanged(this._launchClusterId);
     const response = await ServerConnection.makeRequest(
-      `${this._serverSettings.baseUrl}dask/clusters`,
+      `${this._serverSettings.baseUrl}dask/clusters?cluster_id=100`,
       { method: 'PUT' },
       this._serverSettings
     );
@@ -459,6 +461,7 @@ export class DaskClusterManager extends Widget {
     await this._updateClusterList();
     this._isReady = true;
     this._registry.notifyCommandChanged(this._launchClusterId);
+    await showClusterDialog(model);
     return model;
   }
 
@@ -850,6 +853,26 @@ export interface IClusterModel extends JSONObject {
    * with the minimum and maximum number of workers. Otherwise it is `null`.
    */
   adapt: null | { minimum: number; maximum: number };
+}
+
+export function showClusterDialog(
+  model: IClusterModel
+): Promise<IClusterModel> {
+  let updatedModel = { ...model };
+
+  return showDialog({
+    title: `Scale dciangot ${model.cluster_id}`,
+    body: (
+      "AOO"
+    ),
+    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'SCALE' })]
+  }).then(result => {
+    if (result.button.accept) {
+      return updatedModel;
+    } else {
+      return model;
+    }
+  });
 }
 
 /**
