@@ -22,6 +22,11 @@ Cluster = Any
 
 
 async def make_cluster(configuration: dict) -> Cluster:
+    
+    dask.config.set(labextension__factory__module=configuration["factory"]["module"])
+    dask.config.set(labextension__factory__class=configuration["factory"]["class"])
+    print("DASK CONFIG", dask.config)
+
     module = importlib.import_module(dask.config.get("labextension.factory.module"))
     Cluster = getattr(module, dask.config.get("labextension.factory.class"))
 

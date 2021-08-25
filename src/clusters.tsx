@@ -3,8 +3,7 @@ import {
   Toolbar,
   ToolbarButton,
   CommandToolbarButton,
-  Dialog, 
-  showDialog
+  InputDialog,
 } from '@jupyterlab/apputils';
 
 import { IChangedArgs, URLExt } from '@jupyterlab/coreutils';
@@ -445,9 +444,23 @@ export class DaskClusterManager extends Widget {
   private async _launchCluster(): Promise<IClusterModel> {
     this._isReady = false;
     this._registry.notifyCommandChanged(this._launchClusterId);
+
+    const options = ["Local", "SSH"];
+    let option = options[0];
+
+    const opts = await InputDialog.getItem({
+      title: 'Pick an option to persist by the State Example extension',
+      items: options,
+      current: option,
+    });
+
+    if (opts.button.accept) {
+      option = opts.value;
+    }
+
     const response = await ServerConnection.makeRequest(
-      `${this._serverSettings.baseUrl}dask/clusters?cluster_id=100`,
-      { method: 'PUT' },
+      `${this._serverSettings.baseUrl}dask/clusters?opts=${option}`,
+      { method: 'POST' },
       this._serverSettings
     );
     if (response.status !== 200) {
@@ -461,7 +474,6 @@ export class DaskClusterManager extends Widget {
     await this._updateClusterList();
     this._isReady = true;
     this._registry.notifyCommandChanged(this._launchClusterId);
-    await showClusterDialog(model);
     return model;
   }
 
@@ -853,26 +865,6 @@ export interface IClusterModel extends JSONObject {
    * with the minimum and maximum number of workers. Otherwise it is `null`.
    */
   adapt: null | { minimum: number; maximum: number };
-}
-
-export function showClusterDialog(
-  model: IClusterModel
-): Promise<IClusterModel> {
-  let updatedModel = { ...model };
-
-  return showDialog({
-    title: `Scale dciangot ${model.cluster_id}`,
-    body: (
-      "AOO"
-    ),
-    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'SCALE' })]
-  }).then(result => {
-    if (result.button.accept) {
-      return updatedModel;
-    } else {
-      return model;
-    }
-  });
 }
 
 /**

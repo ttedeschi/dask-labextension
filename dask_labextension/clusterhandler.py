@@ -50,18 +50,36 @@ class DaskClusterHandler(APIHandler):
             self.finish(json.dumps(cluster_model))
 
     @web.authenticated
-    async def put(self, cluster_id: str = "") -> None:
+    async def post(self, cluster_id: str = "", opts: str = "Local") -> None:
         """
         Create a new cluster with a given id. If no id is given, a random
         one is selected.
         """
+        print(opts)
         if manager.get_cluster(cluster_id):
             raise web.HTTPError(
                 403, f"A Dask cluster with ID {cluster_id} already exists!"
             )
 
+        if opts == "Local":
+            cfg = {
+                "factory": {
+                    "module": "dask.distributed",
+                    "class": "LocalCluster"
+                    }
+                }
+        elif opts == "SSH": 
+            cfg = {
+                "factory": {
+                    "module": "dask.distributed",
+                    "class": "SSHCluster"
+                    }
+            } 
         try:
-            cluster_model = await manager.start_cluster(cluster_id)
+            cluster_model = await manager.start_cluster(
+                cluster_id, 
+                configuration=cfg
+                )
             self.set_status(200)
             self.finish(json.dumps(cluster_model))
         except Exception as e:
