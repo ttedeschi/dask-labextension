@@ -458,9 +458,10 @@ export class DaskClusterManager extends Widget {
       option = opts.value;
     }
 
+    const dataToSend = { option: option };
     const response = await ServerConnection.makeRequest(
-      `${this._serverSettings.baseUrl}dask/clusters?opts=${option}`,
-      { method: 'POST' },
+      `${this._serverSettings.baseUrl}dask/clusters`,
+      { method: 'POST', body: JSON.stringify(dataToSend)},
       this._serverSettings
     );
     if (response.status !== 200) {

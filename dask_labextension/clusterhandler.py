@@ -50,11 +50,13 @@ class DaskClusterHandler(APIHandler):
             self.finish(json.dumps(cluster_model))
 
     @web.authenticated
-    async def post(self, cluster_id: str = "", opts: str = "Local") -> None:
+    async def post(self, cluster_id: str = "") -> None:
         """
         Create a new cluster with a given id. If no id is given, a random
         one is selected.
         """
+        input_data = self.get_json_body()
+        opts = input_data["option"]
         print(opts)
         if manager.get_cluster(cluster_id):
             raise web.HTTPError(
