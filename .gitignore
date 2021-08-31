@@ -28,3 +28,5 @@ tsconfig.tsbuildinfo
 
 _temp_extension
 dask-worker-space
+
+myVenv
