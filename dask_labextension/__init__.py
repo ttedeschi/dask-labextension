@@ -3,7 +3,7 @@
 from jupyter_server.utils import url_path_join
 
 from . import config
-from .clusterhandler import DaskClusterHandler
+from .clusterhandler import DaskClusterHandler, DaskFactoriesHandler
 from .dashboardhandler import DaskDashboardCheckHandler, DaskDashboardHandler
 
 
@@ -36,6 +36,7 @@ def load_jupyter_server_extension(nb_server_app):
     cluster_id_regex = r"(?P<cluster_id>\w+-\w+-\w+-\w+-\w+)"
     web_app = nb_server_app.web_app
     base_url = web_app.settings["base_url"]
+    get_factories = url_path_join(base_url, "dask/clusters/factories")
     get_cluster_path = url_path_join(base_url, "dask/clusters/" + cluster_id_regex)
     list_clusters_path = url_path_join(base_url, "dask/clusters/" + "?")
     get_dashboard_path = url_path_join(
@@ -43,6 +44,7 @@ def load_jupyter_server_extension(nb_server_app):
     )
     check_dashboard_path = url_path_join(base_url, "dask/dashboard-check/(?P<url>.+)")
     handlers = [
+        (get_factories, DaskFactoriesHandler),
         (get_cluster_path, DaskClusterHandler),
         (list_clusters_path, DaskClusterHandler),
         (get_dashboard_path, DaskDashboardHandler),

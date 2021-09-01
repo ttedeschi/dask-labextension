@@ -1,5 +1,6 @@
 import {
   showErrorMessage,
+  Dialog,
   Toolbar,
   ToolbarButton,
   CommandToolbarButton
@@ -201,16 +202,43 @@ export class DaskClusterManager extends Widget {
    * Start a new cluster.
    */
   async start(): Promise<IClusterModel> {
+    const response = await ServerConnection.makeRequest(
+      `${this._serverSettings.baseUrl}dask/clusters/factories`,
+      { method: 'GET' },
+      this._serverSettings
+    );
 
-    const createCluster = await showCreatingDialog({
-      "name": "test",
-      "module": "test",
-      "class": "test",
-    });
-    console.log(createCluster);
+    if (response.status !== 200) {
+      const err = 'No response from factories';
+      void showErrorMessage(err, Dialog.cancelButton());
 
-    const cluster = await this._launchCluster();
-    return cluster;
+      throw err;
+    }
+
+    let factories = await response.json();
+    console.log("showCreatingDialog", factories);
+
+    if (factories.factories.length > 0) {
+      let factoryList: IClusterFactoryModel[] = [];
+      factories.factories.forEach(function (val: IClusterFactoryModel) {
+        console.log("forEach", val)
+        factoryList.push({
+          "name": val.name,
+        })
+      });
+      console.log("factoryList", factoryList)
+
+      const selectedFactory = await showCreatingDialog(factoryList);
+      console.log("start", selectedFactory);
+
+      if (selectedFactory.name !== "undefined") {
+        const cluster = await this._launchCluster(selectedFactory.name);
+        return cluster;
+      }
+    } else {
+      const cluster = await this._launchCluster();
+      return cluster;
+    }
   }
 
   /**
@@ -450,12 +478,12 @@ export class DaskClusterManager extends Widget {
   /**
    * Launch a new cluster on the server.
    */
-  private async _launchCluster(): Promise<IClusterModel> {
+  private async _launchCluster(factoryName: string = "default"): Promise<IClusterModel> {
     this._isReady = false;
     this._registry.notifyCommandChanged(this._launchClusterId);
     const response = await ServerConnection.makeRequest(
       `${this._serverSettings.baseUrl}dask/clusters`,
-      { method: 'PUT' },
+      { method: 'PUT', body: JSON.stringify({ factory: factoryName }) },
       this._serverSettings
     );
     if (response.status !== 200) {
@@ -860,6 +888,11 @@ export interface IClusterModel extends JSONObject {
    * with the minimum and maximum number of workers. Otherwise it is `null`.
    */
   adapt: null | { minimum: number; maximum: number };
+
+  /**
+   * Factory type
+   */
+  factory: string;
 }
 
 /**
@@ -870,16 +903,6 @@ export interface IClusterFactoryModel extends JSONObject {
    * Factory name
    */
   name: string;
-
-  /**
-   * Factory python module
-   */
-  module: string;
-
-  /**
-   * Factory python class
-   */
-  class: string;
 }
 
 /**

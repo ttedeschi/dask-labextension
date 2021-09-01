@@ -1,7 +1,13 @@
 labextension:
+  factories:
+    - name: "Factory 0"
+      module: "dask.distributed"
+      class: "LocalCluster"
+      args: []
+      kwargs: {}
   factory:
-    module: 'dask.distributed'
-    class: 'LocalCluster'
+    module: "dask.distributed"
+    class: "LocalCluster"
     args: []
     kwargs: {}
   default:

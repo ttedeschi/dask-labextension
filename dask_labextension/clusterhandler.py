@@ -11,6 +11,21 @@ from jupyter_server.base.handlers import APIHandler
 from .manager import manager
 
 
+class DaskFactoriesHandler(APIHandler):
+    """
+    A tornado HTTP handler for managing dask factories.
+    """
+
+    @web.authenticated
+    async def get(self) -> None:
+        """
+        Get lists of known factories.
+        """
+        factories = manager.get_factories()
+        self.set_status(200)
+        self.finish(json.dumps({"factories": factories}))
+
+
 class DaskClusterHandler(APIHandler):
     """
     A tornado HTTP handler for managing dask clusters.

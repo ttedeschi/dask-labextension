@@ -415,7 +415,7 @@ async function activate(
   app.commands.addCommand(CommandIDs.launchCluster, {
     label: args => (args['isPalette'] ? 'Launch New Cluster' : 'NEW'),
     execute: () => { 
-      console.log("NEW CLUSTER");
+      console.log("NEW CLUSTER COMMAND");
       return sidebar.clusterManager.start();
     },
     iconClass: args =>

@@ -14,13 +14,13 @@ namespace ClusterCreating {
     /**
      * The initial cluster model shown in the scaling.
      */
-    initialModel: IClusterFactoryModel;
+    initialModel: IClusterFactoryModel[];
 
     /**
      * A callback that allows the component to write state to an
      * external object.
      */
-    stateEscapeHatch: (model: IClusterFactoryModel) => void;
+    stateEscapeHatch: (model: IClusterFactoryModel[]) => void;
   }
 
   /**
@@ -30,7 +30,7 @@ namespace ClusterCreating {
     /**
      * The proposed cluster model shown in the scaling.
      */
-    model: IClusterFactoryModel;
+    model: IClusterFactoryModel[];
   }
 }
 
@@ -47,7 +47,7 @@ export class ClusterCreating extends React.Component<
    */
   constructor(props: ClusterCreating.IProps) {
     super(props);
-    let model: IClusterFactoryModel;
+    let model: IClusterFactoryModel[];
     // If the initial model is static, enrich it
     // with placeholder values for minimum and maximum workers.
     model = props.initialModel;
@@ -61,7 +61,7 @@ export class ClusterCreating extends React.Component<
    * be sent as the result of the dialog.
    */
   componentDidUpdate(): void {
-    let model: IClusterFactoryModel = { ...this.state.model };
+    let model: IClusterFactoryModel[] = { ...this.state.model };
     this.props.stateEscapeHatch(model);
   }
 
@@ -107,6 +107,10 @@ export class ClusterCreating extends React.Component<
     // });
   }
 
+  onNameChange(event: React.ChangeEvent): void {
+    // TODO: change the model
+  }
+
   /**
    * React to the maximum slider changing. We also update the minimum
    * so that it is always less than or equal to the maximum.
@@ -131,42 +135,25 @@ export class ClusterCreating extends React.Component<
    */
   render() {
     const model = this.state.model;
+    console.log("render", model);
+    let options = model.map((data) =>
+      <option
+        key={data.name}
+        value={data.name}
+      >
+        {data.name}
+      </option>
+    );
     return (
       <div>
         <span className="dask-ScalingHeader">Factory</span>
         <div className="dask-ScalingSection">
           <div className="dask-ScalingSection-item">
-              Name
-            <input
-              className="dask-ScalingInput"
-              value={model.name}
-              type="text"
-              // onChange={evt => {
-              //   this.onScaleChanged(evt);
-              // }}
-            />
-          </div>
-          <div className="dask-ScalingSection-item">
-              Module
-            <input
-              className="dask-ScalingInput"
-              value={model.module}
-              type="text"
-              // onChange={evt => {
-              //   this.onScaleChanged(evt);
-              // }}
-            />
-          </div>
-          <div className="dask-ScalingSection-item">
-              Class
-            <input
-              className="dask-ScalingInput"
-              value={model.class}
-              type="text"
-              // onChange={evt => {
-              //   this.onScaleChanged(evt);
-              // }}
-            />
+            Name
+            <select name="customSearch" className="custom-search-select" onChange={this.onNameChange}>
+              <option>Select Item</option>
+              {options}
+            </select>
           </div>
         </div>
       </div>
@@ -183,25 +170,26 @@ export class ClusterCreating extends React.Component<
  *   cluster model. If they pressed the cancel button, it resolves with
  *   the original model.
  */
-export function showCreatingDialog(
-  model: IClusterFactoryModel
+export async function showCreatingDialog(
+  factories: IClusterFactoryModel[]
 ): Promise<IClusterFactoryModel> {
-  let updatedModel = { ...model };
-  const escapeHatch = (update: IClusterFactoryModel) => {
+  let updatedModel = { ...factories };
+  const escapeHatch = (update: IClusterFactoryModel[]) => {
     updatedModel = update;
   };
 
   return showDialog({
     title: "Create new cluster",
     body: (
-      <ClusterCreating initialModel={model} stateEscapeHatch={escapeHatch} />
+      <ClusterCreating initialModel={factories} stateEscapeHatch={escapeHatch} />
     ),
     buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'CREATE' })]
   }).then(result => {
     if (result.button.accept) {
-      return updatedModel;
+      // return updatedModel[0];
+      return { "name": "undefined" };
     } else {
-      return model;
+      return { "name": "undefined" };
     }
   });
 }

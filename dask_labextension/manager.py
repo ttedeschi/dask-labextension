@@ -129,6 +129,12 @@ class DaskClusterManager:
         else:
             return None
 
+    def get_factories(self) -> List[ClusterModel]:
+        factories = dask.config.get("labextension.factories", [])
+        print(factories)
+
+        return factories
+
     def get_cluster(self, cluster_id) -> Union[ClusterModel, None]:
         """
         Get a Dask cluster model.
