@@ -12,6 +12,7 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
@@ -413,7 +414,10 @@ async function activate(
   // Add a command to launch a new cluster.
   app.commands.addCommand(CommandIDs.launchCluster, {
     label: args => (args['isPalette'] ? 'Launch New Cluster' : 'NEW'),
-    execute: () => sidebar.clusterManager.start(),
+    execute: () => { 
+      console.log("NEW CLUSTER");
+      return sidebar.clusterManager.start();
+    },
     iconClass: args =>
       args['isPalette'] ? '' : 'jp-AddIcon jp-Icon jp-Icon-16',
     isEnabled: () => sidebar.clusterManager.isReady,

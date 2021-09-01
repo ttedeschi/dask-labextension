@@ -31,6 +31,8 @@ import { Widget, PanelLayout } from '@lumino/widgets';
 
 import { showScalingDialog } from './scaling';
 
+import { showCreatingDialog } from './creatingcluster';
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { CommandRegistry } from '@lumino/commands';
@@ -199,6 +201,14 @@ export class DaskClusterManager extends Widget {
    * Start a new cluster.
    */
   async start(): Promise<IClusterModel> {
+
+    const createCluster = await showCreatingDialog({
+      "name": "test",
+      "module": "test",
+      "class": "test",
+    });
+    console.log(createCluster);
+
     const cluster = await this._launchCluster();
     return cluster;
   }
@@ -850,6 +860,26 @@ export interface IClusterModel extends JSONObject {
    * with the minimum and maximum number of workers. Otherwise it is `null`.
    */
   adapt: null | { minimum: number; maximum: number };
+}
+
+/**
+ * An interface for a JSON-serializable representation of a cluster.
+ */
+export interface IClusterFactoryModel extends JSONObject {
+  /**
+   * Factory name
+   */
+  name: string;
+
+  /**
+   * Factory python module
+   */
+  module: string;
+
+  /**
+   * Factory python class
+   */
+  class: string;
 }
 
 /**
