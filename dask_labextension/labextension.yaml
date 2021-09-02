@@ -1,6 +1,11 @@
 labextension:
   factories:
-    - name: "Factory 0"
+    - name: "HTCondor"
+      module: "dask_remote_jobqueue"
+      class: "RemoteHtcondor"
+      args: []
+      kwargs: {}
+    - name: "Local"
       module: "dask.distributed"
       class: "LocalCluster"
       args: []
