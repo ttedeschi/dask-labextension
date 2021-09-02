@@ -113,7 +113,9 @@ class DaskClusterManager:
 
         self._clusters[cluster_id] = cluster
         self._cluster_names[cluster_id] = cluster_name
-        return make_cluster_model(cluster_id, cluster_name, cluster, adaptive=adaptive)
+        return make_cluster_model(
+            cluster_id, cluster_name, cluster, adaptive=adaptive, factory=factory
+        )
 
     async def close_cluster(self, cluster_id: str) -> Union[ClusterModel, None]:
         """
@@ -261,6 +263,7 @@ def make_cluster_model(
     cluster_name: str,
     cluster: Cluster,
     adaptive: Union[Adaptive, None],
+    factory: str = "default",
 ) -> ClusterModel:
     """
     Make a cluster model. This is a JSON-serializable representation
@@ -302,6 +305,7 @@ def make_cluster_model(
             sum(d["memory_limit"] for d in info["workers"].values())
         ),
         cores=cores,
+        factory=factory,
     )
     if adaptive:
         model["adapt"] = {"minimum": adaptive.minimum, "maximum": adaptive.maximum}

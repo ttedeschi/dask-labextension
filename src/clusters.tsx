@@ -500,6 +500,7 @@ export class DaskClusterManager extends Widget {
     await this._updateClusterList();
     this._isReady = true;
     this._registry.notifyCommandChanged(this._launchClusterId);
+    console.log(model);
     return model;
   }
 
