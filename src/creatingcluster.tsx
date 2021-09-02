@@ -10,6 +10,7 @@ namespace ClusterCreating {
   /**
    * The props for the ClusterCreating component.
    */
+
   export interface IProps {
     /**
      * The initial cluster model shown in the scaling.
@@ -42,6 +43,7 @@ export class ClusterCreating extends React.Component<
   ClusterCreating.IProps,
   ClusterCreating.IState
 > {
+
   /**
    * Construct a new ClusterCreating component.
    */
@@ -65,70 +67,28 @@ export class ClusterCreating extends React.Component<
     this.props.stateEscapeHatch(model);
   }
 
-  /**
-   * React to the number of workers changing.
-   */
-  onScaleChanged(event: React.ChangeEvent): void {
-    // this.setState({
-    //   model: {
-    //     ...this.state.model,
-    //     workers: parseInt((event.target as HTMLInputElement).value, 10)
-    //   }
-    // });
+  onFactoryChange(event: React.ChangeEvent): void {
+    console.log("onFactoryChange", event);
+
+    let currentSelection = (event.target as HTMLInputElement).value;
+    console.log("onFactoryChange", currentSelection);
+
+    console.log("onFactoryChange", this.state)
+
+    this.state.model.forEach((val: IClusterFactoryModel) => {
+      if (val.name === currentSelection) {
+        val.selected = true;
+      } else {
+        val.selected = false;
+      }
+    })
+
+    this.setState({
+      model: this.state.model,
+    });
   }
 
-  /**
-   * React to the user selecting the adapt checkbox.
-   */
-  onScalingChanged(event: React.ChangeEvent): void {
-    // const value = (event.target as HTMLInputElement).checked;
-    // this.setState({
-    //   model: this.state.model,
-    //   adaptive: value
-    // });
-  }
 
-  /**
-   * React to the minimum slider changing. We also update the maximum
-   * so that it is alway greater than or equal to the minimum.
-   */
-  onMinimumChanged(event: React.ChangeEvent): void {
-    // const value = parseInt((event.target as HTMLInputElement).value, 10);
-    // const minimum = Math.max(0, value);
-    // const maximum = Math.max(this.state.model.adapt!.maximum, minimum);
-    // this.setState({
-    //   model: {
-    //     ...this.state.model,
-    //     adapt: {
-    //       maximum,
-    //       minimum
-    //     }
-    //   }
-    // });
-  }
-
-  onNameChange(event: React.ChangeEvent): void {
-    // TODO: change the model
-  }
-
-  /**
-   * React to the maximum slider changing. We also update the minimum
-   * so that it is always less than or equal to the maximum.
-   */
-  onMaximumChanged(event: React.ChangeEvent): void {
-    // const value = parseInt((event.target as HTMLInputElement).value, 10);
-    // const maximum = Math.max(0, value);
-    // const minimum = Math.min(this.state.model.adapt!.minimum, maximum);
-    // this.setState({
-    //   model: {
-    //     ...this.state.model,
-    //     adapt: {
-    //       maximum,
-    //       minimum
-    //     }
-    //   }
-    // });
-  }
 
   /**
    * Render the component..
@@ -150,7 +110,9 @@ export class ClusterCreating extends React.Component<
         <div className="dask-ScalingSection">
           <div className="dask-ScalingSection-item">
             Name
-            <select name="customSearch" className="custom-search-select" onChange={this.onNameChange}>
+            <select name="customSearch" className="custom-search-select" onChange={evt => {
+              this.onFactoryChange(evt);
+            }}>
               <option>Select Item</option>
               {options}
             </select>
@@ -173,9 +135,9 @@ export class ClusterCreating extends React.Component<
 export async function showCreatingDialog(
   factories: IClusterFactoryModel[]
 ): Promise<IClusterFactoryModel> {
-  let updatedModel = { ...factories };
+  let newModel = { ...factories };
   const escapeHatch = (update: IClusterFactoryModel[]) => {
-    updatedModel = update;
+    newModel = update;
   };
 
   return showDialog({
@@ -185,11 +147,21 @@ export async function showCreatingDialog(
     ),
     buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'CREATE' })]
   }).then(result => {
+    console.log("showCreatingDialog", result)
+    console.log("showCreatingDialog", factories)
+    console.log("showCreatingDialog", newModel)
     if (result.button.accept) {
-      // return updatedModel[0];
-      return { "name": "undefined" };
+      for (let index in newModel) {
+        if (newModel.hasOwnProperty(index)) {
+          let curFactory = newModel[index];
+          if (curFactory.selected === true) {
+            return curFactory;
+          }
+        }
+      }
+      return { "name": "undefined", "selected": false };
     } else {
-      return { "name": "undefined" };
+      return { "name": "undefined", "selected": false };
     }
   });
 }

@@ -21,9 +21,16 @@ ClusterModel = Dict[str, Any]
 Cluster = Any
 
 
-async def make_cluster(configuration: dict) -> Cluster:
+async def make_cluster(configuration: dict, factory: str = "default") -> Cluster:
     module = importlib.import_module(dask.config.get("labextension.factory.module"))
     Cluster = getattr(module, dask.config.get("labextension.factory.class"))
+
+    if factory != "default":
+        factories: List[ClusterModel] = dask.config.get("labextension.factories")
+        for cur_factory in factories:
+            if cur_factory["name"] == factory:
+                module = importlib.import_module(cur_factory["module"])
+                Cluster = getattr(module, cur_factory["class"])
 
     kwargs = dask.config.get("labextension.factory.kwargs")
     kwargs = {key.replace("-", "_"): entry for key, entry in kwargs.items()}
@@ -70,7 +77,10 @@ class DaskClusterManager:
         IOLoop.current().add_callback(start_clusters)
 
     async def start_cluster(
-        self, cluster_id: str = "", configuration: dict = {}
+        self,
+        cluster_id: str = "",
+        configuration: dict = {},
+        factory: str = "default",
     ) -> ClusterModel:
         """
         Start a new Dask cluster.
@@ -87,7 +97,7 @@ class DaskClusterManager:
         if not cluster_id:
             cluster_id = str(uuid4())
 
-        cluster, adaptive = await make_cluster(configuration)
+        cluster, adaptive = await make_cluster(configuration, factory=factory)
         self._n_clusters += 1
 
         # Check for a name in the config
@@ -131,7 +141,7 @@ class DaskClusterManager:
 
     def get_factories(self) -> List[ClusterModel]:
         factories = dask.config.get("labextension.factories", [])
-        print(factories)
+        print("get_factories", factories)
 
         return factories
 

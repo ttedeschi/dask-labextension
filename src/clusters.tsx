@@ -216,7 +216,7 @@ export class DaskClusterManager extends Widget {
     }
 
     let factories = await response.json();
-    console.log("showCreatingDialog", factories);
+    console.log("start factories", factories);
 
     if (factories.factories.length > 0) {
       let factoryList: IClusterFactoryModel[] = [];
@@ -224,14 +224,15 @@ export class DaskClusterManager extends Widget {
         console.log("forEach", val)
         factoryList.push({
           "name": val.name,
+          "selected": false,
         })
       });
-      console.log("factoryList", factoryList)
+      console.log("start factoryList", factoryList)
 
       const selectedFactory = await showCreatingDialog(factoryList);
       console.log("start", selectedFactory);
 
-      if (selectedFactory.name !== "undefined") {
+      if (selectedFactory.name !== "undefined" && selectedFactory.selected !== false) {
         const cluster = await this._launchCluster(selectedFactory.name);
         return cluster;
       }
@@ -481,9 +482,11 @@ export class DaskClusterManager extends Widget {
   private async _launchCluster(factoryName: string = "default"): Promise<IClusterModel> {
     this._isReady = false;
     this._registry.notifyCommandChanged(this._launchClusterId);
+    let data = JSON.stringify({ factoryName: factoryName });
+    console.log("_launchCluster", data);
     const response = await ServerConnection.makeRequest(
       `${this._serverSettings.baseUrl}dask/clusters`,
-      { method: 'PUT', body: JSON.stringify({ factory: factoryName }) },
+      { method: 'PUT', body: data },
       this._serverSettings
     );
     if (response.status !== 200) {
@@ -903,6 +906,11 @@ export interface IClusterFactoryModel extends JSONObject {
    * Factory name
    */
   name: string;
+
+  /**
+   * Selected factory
+   */
+  selected: boolean;
 }
 
 /**
