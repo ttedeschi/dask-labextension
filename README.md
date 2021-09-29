@@ -31,7 +31,7 @@ You can specify the list of clusters you want to show as following:
 ```yaml
 labextension:
   factories:
-    # First type of cluster
+    # First type of cluster (a custom class from a Python module)
     - name: "HTCondor"
       module: "dask_remote_jobqueue"
       class: "RemoteHtcondor"
