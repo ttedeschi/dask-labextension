@@ -26,7 +26,7 @@ Options for how to launch these clusters are set via the
 [dask configuration system](http://docs.dask.org/en/latest/configuration.html#configuration),
 typically a `.yml` file on disk.
 
-You can specify the list of clusters you want to show as following:
+You can specify the list of clusters you want to use with the `factories` field in the `labextension.yaml` file, as following:
 
 ```yaml
 labextension:
