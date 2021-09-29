@@ -1,4 +1,4 @@
-# af-plugin
+# dask-labextension: af_plugin
 
 This is a fork of [Dask JupyterLab Extension](https://github.com/dask/dask-labextension) to support multiple types of cluster selection as shown in the figures:
 
