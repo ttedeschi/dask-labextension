@@ -1,9 +1,8 @@
 # af-plugin
 
-This is a fork of [Dask JupyterLab Extension](https://github.com/dask/dask-labextension) to support multiple type of cluster selection.
+This is a fork of [Dask JupyterLab Extension](https://github.com/dask/dask-labextension) to support multiple types of cluster selection as shown in the figures:
 
-<img align="left" src="dask_newcluster.png">
-<img align="right" src="dask_newcluster_choice.png">
+<img src="dask_newcluster.png"><img align="right" src="dask_newcluster_choice.png">
 
 ## Requirements
 
