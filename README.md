@@ -16,7 +16,7 @@ To install the Dask JupyterLab extension you will need to have JupyterLab 3.0 or
 ```bash
 jlpm
 jlpm build
-python3 -m pip install .
+python3 -m pip install . --use-feature=in-tree-build
 ```
 
 ## Configuration of Dask cluster management
