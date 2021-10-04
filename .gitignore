@@ -30,3 +30,4 @@ _temp_extension
 dask-worker-space
 
 myVenv
+dask_labextension.log

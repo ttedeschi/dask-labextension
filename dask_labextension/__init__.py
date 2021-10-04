@@ -1,13 +1,14 @@
 """A Jupyter server extension for managing Dask clusters."""
 
+import os
+
 from jupyter_server.utils import url_path_join
+from loguru import logger
 
 from . import config
+from ._version import get_versions
 from .clusterhandler import DaskClusterHandler, DaskFactoriesHandler
 from .dashboardhandler import DaskDashboardCheckHandler, DaskDashboardHandler
-
-
-from ._version import get_versions
 
 __version__ = get_versions()["version"]
 del get_versions
@@ -33,6 +34,13 @@ def load_jupyter_server_extension(nb_server_app):
     Args:
         nb_server_app (NotebookWebApplication): handle to the Notebook webserver instance.
     """
+    try:
+        logger.add("/var/log/dask_labextension.log")
+    except PermissionError:
+        logger.add(os.path.join(os.path.dirname(__file__), "dask_labextension.log"))
+
+    logger.debug("[load_jupyter_server_extension]")
+
     cluster_id_regex = r"(?P<cluster_id>\w+-\w+-\w+-\w+-\w+)"
     web_app = nb_server_app.web_app
     base_url = web_app.settings["base_url"]
