@@ -6,9 +6,12 @@ from jupyter_server.utils import url_path_join
 from loguru import logger
 
 try:
-    logger.add("/var/log/dask_labextension.log")
+    logger.add("/var/log/dask_labextension.log", rotation="32 MB")
 except PermissionError:
-    logger.add(os.path.join(os.path.dirname(__file__), "dask_labextension.log"))
+    logger.add(
+        os.path.join(os.path.dirname(__file__), "dask_labextension.log"),
+        rotation="32 MB",
+    )
 
 from . import config
 from ._version import get_versions
