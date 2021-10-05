@@ -150,7 +150,6 @@ class DaskClusterManager:
             return make_cluster_model(
                 cluster_id, name, cluster, adaptive, factory=factory
             )
-
         else:
             return None
 
