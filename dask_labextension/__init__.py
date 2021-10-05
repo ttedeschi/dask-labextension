@@ -5,6 +5,11 @@ import os
 from jupyter_server.utils import url_path_join
 from loguru import logger
 
+try:
+    logger.add("/var/log/dask_labextension.log")
+except PermissionError:
+    logger.add(os.path.join(os.path.dirname(__file__), "dask_labextension.log"))
+
 from . import config
 from ._version import get_versions
 from .clusterhandler import DaskClusterHandler, DaskFactoriesHandler
@@ -34,11 +39,6 @@ def load_jupyter_server_extension(nb_server_app):
     Args:
         nb_server_app (NotebookWebApplication): handle to the Notebook webserver instance.
     """
-    try:
-        logger.add("/var/log/dask_labextension.log")
-    except PermissionError:
-        logger.add(os.path.join(os.path.dirname(__file__), "dask_labextension.log"))
-
     logger.debug("[load_jupyter_server_extension]")
 
     cluster_id_regex = r"(?P<cluster_id>\w+-\w+-\w+-\w+-\w+)"
