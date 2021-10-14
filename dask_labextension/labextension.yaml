@@ -2,7 +2,7 @@ labextension:
   factories:
     - name: "HTCondor"
       module: "dask_remote_jobqueue"
-      class: "RemoteHtcondor"
+      class: "RemoteHTCondor"
       args: []
       kwargs: {}
     - name: "Local"
