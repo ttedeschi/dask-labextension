@@ -1,5 +1,4 @@
 labextension:
-  factories:
     - name: "HTCondor"
       module: "dask_remote_jobqueue"
       class: "RemoteHTCondor"
