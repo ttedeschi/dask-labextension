@@ -28,6 +28,11 @@ async def make_cluster(configuration: dict, factory: str = "default") -> Cluster
     module = importlib.import_module(dask.config.get("labextension.factory.module"))
     Cluster = getattr(module, dask.config.get("labextension.factory.class"))
 
+    args = dask.config.get("labextension.factory.args", [])
+
+    kwargs = dask.config.get("labextension.factory.kwargs", {})
+    kwargs = {key.replace("-", "_"): entry for key, entry in kwargs.items()}
+
     if factory != "default":
         factories: List[ClusterModel] = dask.config.get("labextension.factories")
         for cur_factory in factories:
@@ -35,14 +40,13 @@ async def make_cluster(configuration: dict, factory: str = "default") -> Cluster
                 module = importlib.import_module(cur_factory["module"])
                 Cluster = getattr(module, cur_factory["class"])
 
-    kwargs = dask.config.get("labextension.factory.kwargs")
-    kwargs = {key.replace("-", "_"): entry for key, entry in kwargs.items()}
+                args += cur_factory.get("args", [])
+                kwargs.update(cur_factory.get("kwargs", {}))
+                kwargs = {key.replace("-", "_"): entry for key, entry in kwargs.items()}
 
     logger.debug(f"[make_cluster][kwargs: {kwargs}]")
 
-    cluster = await Cluster(
-        *dask.config.get("labextension.factory.args"), **kwargs, asynchronous=True
-    )
+    cluster = await Cluster(*args, **kwargs, asynchronous=True)
 
     configuration = dask.config.merge(
         dask.config.get("labextension.default"), configuration
