@@ -41,7 +41,7 @@ async def make_cluster(configuration: dict, factory: str = "default") -> Cluster
                 Cluster = getattr(module, cur_factory["class"])
 
                 args += cur_factory.get("args", [])
-                kwargs.update(cur_factory.get("kwargs", {}))
+                kwargs = {**kwargs, **cur_factory.get("kwargs", {})}
                 kwargs = {key.replace("-", "_"): entry for key, entry in kwargs.items()}
 
     logger.debug(f"[make_cluster][kwargs: {kwargs}]")
