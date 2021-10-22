@@ -22,6 +22,13 @@ ClusterModel = Dict[str, Any]
 Cluster = Any
 
 
+def _get_factories() -> List[ClusterModel]:
+    factories: List[ClusterModel] = dask.config.get("labextension.factories", [])
+    logger.debug(f"[DaskClusterManager][factories: {factories}]")
+
+    return factories
+
+
 async def make_cluster(configuration: dict, factory: str = "default") -> Cluster:
     logger.debug(f"[make_cluster][configuration: {configuration}][factory: {factory}]")
 
@@ -34,8 +41,7 @@ async def make_cluster(configuration: dict, factory: str = "default") -> Cluster
     kwargs = {key.replace("-", "_"): entry for key, entry in kwargs.items()}
 
     if factory != "default":
-        factories: List[ClusterModel] = dask.config.get("labextension.factories")
-        for cur_factory in factories:
+        for cur_factory in _get_factories():
             if cur_factory["name"] == factory:
                 module = importlib.import_module(cur_factory["module"])
                 Cluster = getattr(module, cur_factory["class"])
@@ -117,6 +123,15 @@ class DaskClusterManager:
         else:
             cluster_name = configuration["name"]
 
+        if factory != "default":
+            factories: List[ClusterModel] = self.get_factories()
+            for cur_factory in factories:
+                if cur_factory["name"] == factory:
+                    kwargs: dict = cur_factory.get("kwargs", {})
+                    sitename: str = kwargs.get("sitename", "")
+                    if sitename:
+                        cluster_name = f"{cluster_name} - {sitename}"
+
         # Check if the cluster was started adaptively
         if adaptive:
             self._adaptives[cluster_id] = adaptive
@@ -158,10 +173,7 @@ class DaskClusterManager:
             return None
 
     def get_factories(self) -> List[ClusterModel]:
-        factories = dask.config.get("labextension.factories", [])
-        logger.debug(f"[DaskClusterManager][factories: {factories}]")
-
-        return factories
+        return _get_factories()
 
     def get_cluster(self, cluster_id) -> Union[ClusterModel, None]:
         """
