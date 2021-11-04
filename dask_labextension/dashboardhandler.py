@@ -13,6 +13,7 @@ from jupyter_server.utils import url_path_join
 from jupyter_server_proxy.handlers import ProxyHandler
 
 from .manager import manager
+from loguru import logger
 
 
 class DaskDashboardCheckHandler(APIHandler):
@@ -142,8 +143,30 @@ class DaskDashboardHandler(ProxyHandler):
         return self.proxy(cluster_id, proxied_path)
 
     def proxy(self, cluster_id, proxied_path):
+        logger.debug(f"[proxy][cluster_id: {cluster_id}][proxied_path: {proxied_path}]")
         host, port = self._get_parsed(cluster_id)
+        if proxied_path == "/logs":
+            host, port = self._get_parsed_4logs(cluster_id)
+        logger.debug(f"[proxy][host: {host}][port: {port}]")
         return super().proxy(host, port, proxied_path)
+
+    def _get_parsed_4logs(self, cluster_id):
+        """
+        Given a cluster ID, get the hostname and port of its log server.
+        """
+        cluster_model = manager.get_cluster(cluster_id)
+        if not cluster_model:
+            raise web.HTTPError(404, f"Dask cluster {cluster_id} not found")
+
+        # Construct the proper websocket proxy link from the cluster dashboard
+        dashboard_link = cluster_model["dashboard_link"]
+        dashboard_link = _normalize_dashboard_link(dashboard_link, self.request)
+        # Parse the url and return
+        parsed = parse.urlparse(dashboard_link)
+        port = cluster_model["logs_port"]
+        if not port:
+            raise web.HTTPError(500, "Missing logs port")
+        return parsed.hostname, port
 
     def _get_parsed(self, cluster_id):
         """

@@ -343,6 +343,7 @@ def make_cluster_model(
         ),
         cores=cores,
         factory=factory,
+        logs_port=getattr(cluster, "logs_port", None),
     )
     if adaptive:
         model["adapt"] = {"minimum": adaptive.minimum, "maximum": adaptive.maximum}

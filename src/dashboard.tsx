@@ -558,6 +558,9 @@ namespace Private {
       const plot = { route: route, label: label, key: label };
       plots.push(plot);
     }
+    const log_plot = { route: "/logs", label: "LOGS", key: "LOGS" };
+    plots.push(log_plot);
+    console.log(plots);
     return plots;
   }
 
