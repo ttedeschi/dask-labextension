@@ -165,7 +165,9 @@ class DaskDashboardHandler(ProxyHandler):
         parsed = parse.urlparse(dashboard_link)
         port = cluster_model["logs_port"]
         if not port:
-            raise web.HTTPError(500, "Missing logs port")
+            raise web.HTTPError(
+                404, "Sorry, this service is not available within your dask cluster..."
+            )
         return parsed.hostname, port
 
     def _get_parsed(self, cluster_id):
