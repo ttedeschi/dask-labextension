@@ -202,6 +202,8 @@ export class DaskClusterManager extends Widget {
    * Start a new cluster.
    */
   async start(): Promise<IClusterModel> {
+    this._isReady = false;
+
     const response = await ServerConnection.makeRequest(
       `${this._serverSettings.baseUrl}dask/clusters/factories`,
       { method: 'GET' },
@@ -212,6 +214,7 @@ export class DaskClusterManager extends Widget {
       const err = 'No response from factories';
       void showErrorMessage(err, Dialog.cancelButton());
 
+      this._isReady = true;
       throw err;
     }
 
@@ -234,10 +237,12 @@ export class DaskClusterManager extends Widget {
 
       if (selectedFactory.name !== "undefined" && selectedFactory.selected !== false) {
         const cluster = await this._launchCluster(selectedFactory.name);
+        this._isReady = true;
         return cluster;
       }
     } else {
       const cluster = await this._launchCluster();
+      this._isReady = true;
       return cluster;
     }
   }
@@ -480,7 +485,6 @@ export class DaskClusterManager extends Widget {
    * Launch a new cluster on the server.
    */
   private async _launchCluster(factoryName: string = "default"): Promise<IClusterModel> {
-    this._isReady = false;
     this._registry.notifyCommandChanged(this._launchClusterId);
     let data = JSON.stringify({ factoryName: factoryName });
     console.log("_launchCluster", data);
@@ -492,13 +496,11 @@ export class DaskClusterManager extends Widget {
     if (response.status !== 200) {
       const err = await response.json();
       void showErrorMessage('Cluster Start Error', err);
-      this._isReady = true;
       this._registry.notifyCommandChanged(this._launchClusterId);
       throw err;
     }
     const model = (await response.json()) as IClusterModel;
     await this._updateClusterList();
-    this._isReady = true;
     this._registry.notifyCommandChanged(this._launchClusterId);
     console.log(model);
     return model;
