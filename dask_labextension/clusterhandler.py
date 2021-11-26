@@ -105,6 +105,7 @@ class DaskClusterHandler(APIHandler):
         logger.debug(f"[DaskClusterHandler][PATCH][cluster_id: {cluster_id}]")
 
         new_model = json.loads(self.request.body)
+        logger.debug(f"[DaskClusterHandler][PATCH][new_model: {new_model}]")
         try:
             if new_model.get("adapt") is not None:
                 cluster_model = manager.adapt_cluster(
