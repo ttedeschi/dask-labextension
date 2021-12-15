@@ -146,7 +146,6 @@ class DaskClusterManager:
     async def close_cluster(
         self,
         cluster_id: str,
-        factory: str = "default",
     ) -> Union[ClusterModel, None]:
         """
         Close a Dask cluster.
@@ -166,6 +165,7 @@ class DaskClusterManager:
             self._clusters.pop(cluster_id)
             name = self._cluster_names.pop(cluster_id)
             adaptive = self._adaptives.pop(cluster_id, None)
+            factory = self._factories.get(cluster_id, "default")
             return make_cluster_model(
                 cluster_id, name, cluster, adaptive, factory=factory
             )
