@@ -727,6 +727,17 @@ function ClusterListingItem(props: IClusterListingItemProps) {
 
   let minimum: JSX.Element | null = null;
   let maximum: JSX.Element | null = null;
+  let controller_address: JSX.Element | null = null;
+  if (cluster.controller_address != "") {
+    controller_address = (
+      <div
+        className="dask-ClusterListingItem-link"
+        title={cluster.controller_address}
+      >
+        Controller Address: {cluster.controller_address}
+      </div>
+    );
+  }
   if (cluster.adapt) {
     minimum = (
       <div className="dask-ClusterListingItem-stats">
@@ -767,6 +778,7 @@ function ClusterListingItem(props: IClusterListingItemProps) {
           {cluster.dashboard_link}
         </a>
       </div>
+      {controller_address}
       <div className="dask-ClusterListingItem-stats">
         Number of Cores: {cluster.cores}
       </div>
@@ -897,6 +909,11 @@ export interface IClusterModel extends JSONObject {
    * Factory type
    */
   factory: string;
+
+  /**
+   * controller_address type
+   */
+  controller_address: string;
 }
 
 /**
