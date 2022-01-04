@@ -730,7 +730,7 @@ function ClusterListingItem(props: IClusterListingItemProps) {
   let controller_address: JSX.Element | null = null;
   let job_status: JSX.Element | null = null;
   if (cluster.job_status != "") {
-    controller_address = (
+    job_status = (
       <div className="dask-ClusterListingItem-stats">
         {cluster.job_status}
       </div>
