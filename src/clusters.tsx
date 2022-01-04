@@ -732,7 +732,7 @@ function ClusterListingItem(props: IClusterListingItemProps) {
   if (cluster.job_status != "") {
     job_status = (
       <div className="dask-ClusterListingItem-stats">
-        {cluster.job_status}
+        Status: {cluster.job_status}
       </div>
     );
   }
