@@ -728,6 +728,14 @@ function ClusterListingItem(props: IClusterListingItemProps) {
   let minimum: JSX.Element | null = null;
   let maximum: JSX.Element | null = null;
   let controller_address: JSX.Element | null = null;
+  let job_status: JSX.Element | null = null;
+  if (cluster.job_status != "") {
+    controller_address = (
+      <div className="dask-ClusterListingItem-stats">
+        {cluster.job_status}
+      </div>
+    );
+  }
   if (cluster.controller_address != "") {
     controller_address = (
       <div
@@ -761,6 +769,7 @@ function ClusterListingItem(props: IClusterListingItemProps) {
       }}
     >
       <div className="dask-ClusterListingItem-title">{cluster.name}</div>
+      {job_status}
       <div
         className="dask-ClusterListingItem-link"
         title={cluster.scheduler_address}
@@ -914,6 +923,11 @@ export interface IClusterModel extends JSONObject {
    * controller_address type
    */
   controller_address: string;
+
+  /**
+   * job_status type
+   */
+  job_status: string;
 }
 
 /**

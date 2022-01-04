@@ -345,6 +345,7 @@ def make_cluster_model(
         factory=factory,
         logs_port=getattr(cluster, "logs_port", None),
         controller_address=getattr(cluster, "controller_address", ""),
+        job_status=getattr(cluster, "job_status", ""),
         ##
         # Local testing
         # logs_port=getattr(cluster, "logs_port", 8181),
