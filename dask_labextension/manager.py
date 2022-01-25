@@ -161,7 +161,9 @@ class DaskClusterManager:
         """
         cluster = self._clusters.get(cluster_id)
         if cluster:
-            await cluster.close()
+            f = cluster.close()
+            if isawaitable(f):
+                await f
             self._clusters.pop(cluster_id)
             name = self._cluster_names.pop(cluster_id)
             adaptive = self._adaptives.pop(cluster_id, None)
