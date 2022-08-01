@@ -89,7 +89,9 @@ class DaskClusterHandler(APIHandler):
 
         try:
             cluster_model = await manager.start_cluster(
-                cluster_id, factory=extra_vars["factoryName"]
+                cluster_id,
+                factory=extra_vars["factoryName"],
+                configuration={"singularity_wn_image": extra_vars["singularityImage"]}
             )
             self.set_status(200)
             self.finish(json.dumps(cluster_model))

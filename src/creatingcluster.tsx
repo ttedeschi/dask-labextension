@@ -88,7 +88,22 @@ export class ClusterCreating extends React.Component<
     });
   }
 
+  onImageChange(event: React.ChangeEvent): void {
+    console.log("onFactoryChange", event);
 
+    let currentSelection = (event.target as HTMLInputElement).value;
+    console.log("onFactoryChange", currentSelection);
+
+    console.log("onFactoryChange", this.state)
+
+    this.state.model.forEach((val: IClusterFactoryModel) => {
+        val.singularityImage = currentSelection
+    })
+
+    this.setState({
+      model: this.state.model,
+    });
+  }
 
   /**
    * Render the component..
@@ -109,13 +124,23 @@ export class ClusterCreating extends React.Component<
         <span className="dask-ScalingHeader">Factory</span>
         <div className="dask-ScalingSection">
           <div className="dask-ScalingSection-item">
-            Name
+            Name:
             <select name="customSearch" className="custom-search-select" onChange={evt => {
               this.onFactoryChange(evt);
             }}>
               <option>Select Item</option>
               {options}
             </select>
+          </div>
+          <div className="dask-ScalingSection-item">
+              WN Image:
+              <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" onChange={evt => {
+              this.onImageChange(evt);
+            }}/>
+            <datalist id="ice-cream-flavors">
+              <option value="/cvmfs/images.dodas.infn.it/registry.hub.docker.com/dodasts/root-in-docker:ubuntu22-kernel-v1"> Base RDF </option>
+              <option value="TODO"> Base Coffea [WIP] </option>
+            </datalist>
           </div>
         </div>
       </div>
@@ -159,9 +184,9 @@ export async function showCreatingDialog(
           }
         }
       }
-      return { "name": "undefined", "selected": false };
+      return { "name": "undefined", "selected": false, "singularityImage": "DUMMY" };
     } else {
-      return { "name": "undefined", "selected": false };
+      return { "name": "undefined", "selected": false, "singularityImage": "DUMMY" };
     }
   });
 }

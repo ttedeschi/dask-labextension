@@ -225,6 +225,7 @@ export class DaskClusterManager extends Widget {
         factoryList.push({
           "name": val.name,
           "selected": false,
+          "singularityImage": val.singularityImage
         })
       });
       console.log("start factoryList", factoryList)
@@ -233,7 +234,7 @@ export class DaskClusterManager extends Widget {
       console.log("start", selectedFactory);
 
       if (selectedFactory.name !== "undefined" && selectedFactory.selected !== false) {
-        const cluster = await this._launchCluster(selectedFactory.name);
+        const cluster = await this._launchCluster(selectedFactory.name, selectedFactory.singularityImage);
         return cluster;
       }
     } else {
@@ -479,10 +480,10 @@ export class DaskClusterManager extends Widget {
   /**
    * Launch a new cluster on the server.
    */
-  private async _launchCluster(factoryName: string = "default"): Promise<IClusterModel> {
+  private async _launchCluster(factoryName: string = "default", singularityImage: string = ""): Promise<IClusterModel> {
     this._isReady = false;
     this._registry.notifyCommandChanged(this._launchClusterId);
-    let data = JSON.stringify({ factoryName: factoryName });
+    let data = JSON.stringify({ factoryName: factoryName, singularityImage: singularityImage });
     console.log("_launchCluster", data);
     const response = await ServerConnection.makeRequest(
       `${this._serverSettings.baseUrl}dask/clusters`,
@@ -938,6 +939,8 @@ export interface IClusterFactoryModel extends JSONObject {
    * Factory name
    */
   name: string;
+
+  singularityImage: string;
 
   /**
    * Selected factory
