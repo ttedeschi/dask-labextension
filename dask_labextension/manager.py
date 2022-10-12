@@ -50,7 +50,7 @@ async def make_cluster(configuration: dict, factory: str = "default") -> Cluster
                 kwargs = {**kwargs, **cur_factory.get("kwargs", {})}
                 kwargs = {key.replace("-", "_"): entry for key, entry in kwargs.items()}
                 if "singularity_wn_image" in configuration:
-                    kwargs.update({"singularity_wn_image": configuration["singularity_wn_image"]})
+                    kwargs.update({"singularity_wn_image": "\"" + configuration["singularity_wn_image"] + "\"" })
 
     configuration.pop("singularity_wn_image")
     logger.debug(f"[make_cluster][kwargs: {kwargs}]")

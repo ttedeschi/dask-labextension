@@ -81,7 +81,7 @@ setup_args = dict(
     packages=setuptools.find_packages(),
     install_requires=[
         "bokeh >=1.0.0,!=2.0.0",
-        "distributed>=1.24.1",
+        "distributed>=2022.9.2",
         "jupyter-server-proxy>=1.3.2",
         "jupyterlab>=3.0.0",
         "loguru>=0.5.3",
