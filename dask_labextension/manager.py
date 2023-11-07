@@ -32,6 +32,10 @@ def _get_factories() -> List[ClusterModel]:
 async def make_cluster(configuration: dict, factory: str = "default") -> Cluster:
     logger.debug(f"[make_cluster][configuration: {configuration}][factory: {factory}]")
 
+    if factory != "Local" or factory != "local":
+        configuration.pop("singularity_wn_image")
+        
+
     module = importlib.import_module(dask.config.get("labextension.factory.module"))
     Cluster = getattr(module, dask.config.get("labextension.factory.class"))
 
@@ -51,8 +55,8 @@ async def make_cluster(configuration: dict, factory: str = "default") -> Cluster
                 kwargs = {key.replace("-", "_"): entry for key, entry in kwargs.items()}
                 if "singularity_wn_image" in configuration:
                     kwargs.update({"singularity_wn_image": "\"" + configuration["singularity_wn_image"] + "\"" })
-
-    configuration.pop("singularity_wn_image")
+    if not(factory != "Local" or factory != "local"):
+        configuration.pop("singularity_wn_image")
     logger.debug(f"[make_cluster][kwargs: {kwargs}]")
     logger.debug(f"[make_cluster][configuration: {configuration}]")
 
