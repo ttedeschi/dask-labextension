@@ -207,7 +207,7 @@ export class DaskClusterManager extends Widget {
       { method: 'GET' },
       this._serverSettings
     );
-    
+    console.log(`${this._serverSettings.baseUrl}dask/clusters/factories`);
     if (response.status === 404) {
       const err = new Error('Resource not found');
       void showErrorMessage('Error', err);
