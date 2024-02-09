@@ -207,14 +207,24 @@ export class DaskClusterManager extends Widget {
       { method: 'GET' },
       this._serverSettings
     );
-
-    if (response.status !== 200) {
-      const err = new Error('No response from factories');
+    
+    if (response.status === 404) {
+      const err = new Error('Resource not found');
       void showErrorMessage('Error', err);
-      //void showErrorMessage('Cluster Start Error', { message: err });
-
+      throw err;
+    } else if (response.status !== 200) {
+      const err = new Error('Unexpected response from server');
+      void showErrorMessage('Error', err);
       throw err;
     }
+    
+    //if (response.status !== 200) {
+    //  const err = new Error('No response from factories');
+    //  void showErrorMessage('Error', err);
+    //  //void showErrorMessage('Cluster Start Error', { message: err });
+
+    //  throw err;
+    //}
 
     let factories = await response.json();
     console.log("start factories", factories);
