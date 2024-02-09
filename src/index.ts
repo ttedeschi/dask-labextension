@@ -585,9 +585,9 @@ client = Client()`;
     editor: CodeEditor.IEditor
   ): void {
     const cursor = editor.getCursorPosition();
-    //const offset = editor.getOffsetAt(cursor);
-    //const code = getClientCode(cluster);
-    //editor.model.value.insert(offset, code);
+    const offset = editor.getOffsetAt(cursor);
+    const code = getClientCode(cluster);
+    editor.model.value.insert(offset, code);
   }
 
   /**
