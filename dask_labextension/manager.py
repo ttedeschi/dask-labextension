@@ -9,10 +9,10 @@ from typing import Any, Dict, List, Union
 from uuid import uuid4
 
 import dask
-from dask.utils import format_bytes
 from dask.distributed import Adaptive
-from tornado.ioloop import IOLoop
+from loguru import logger
 from tornado.concurrent import Future
+from tornado.ioloop import IOLoop
 
 # A type for a dask cluster model: a serializable
 # representation of information about the cluster.
@@ -22,16 +22,45 @@ ClusterModel = Dict[str, Any]
 Cluster = Any
 
 
-async def make_cluster(configuration: dict) -> Cluster:
+def _get_factories() -> List[ClusterModel]:
+    factories: List[ClusterModel] = dask.config.get("labextension.factories", [])
+    logger.debug(f"[DaskClusterManager][factories: {factories}]")
+
+    return factories
+
+
+async def make_cluster(configuration: dict, factory: str = "default") -> Cluster:
+    logger.debug(f"[make_cluster][configuration: {configuration}][factory: {factory}]")
+    
+    if factory != "Local" or factory != "local":
+        configuration.pop("singularity_wn_image")
+    
     module = importlib.import_module(dask.config.get("labextension.factory.module"))
     Cluster = getattr(module, dask.config.get("labextension.factory.class"))
 
-    kwargs = dask.config.get("labextension.factory.kwargs")
+    args = dask.config.get("labextension.factory.args", [])
+
+    kwargs = dask.config.get("labextension.factory.kwargs", {})
     kwargs = {key.replace("-", "_"): entry for key, entry in kwargs.items()}
 
-    cluster = await Cluster(
-        *dask.config.get("labextension.factory.args"), **kwargs, asynchronous=True
-    )
+    if factory != "default":
+        for cur_factory in _get_factories():
+            if cur_factory["name"] == factory:
+                module = importlib.import_module(cur_factory["module"])
+                Cluster = getattr(module, cur_factory["class"])
+
+                args += cur_factory.get("args", [])
+                kwargs = {**kwargs, **cur_factory.get("kwargs", {})}
+                kwargs = {key.replace("-", "_"): entry for key, entry in kwargs.items()}
+                if "singularity_wn_image" in configuration:
+                    kwargs.update({"singularity_wn_image": "\"" + configuration["singularity_wn_image"] + "\"" })
+    
+    if not(factory != "Local" or factory != "local"):
+        configuration.pop("singularity_wn_image")
+    logger.debug(f"[make_cluster][kwargs: {kwargs}]")
+    logger.debug(f"[make_cluster][configuration: {configuration}]")
+
+    cluster = await Cluster(*args, **kwargs, asynchronous=True)
 
     configuration = dask.config.merge(
         dask.config.get("labextension.default"), configuration
@@ -58,6 +87,7 @@ class DaskClusterManager:
         """Initialize the cluster manager"""
         self._clusters: Dict[str, Cluster] = dict()
         self._adaptives: Dict[str, Adaptive] = dict()
+        self._factories: Dict[str, str] = dict()
         self._cluster_names: Dict[str, str] = dict()
         self._n_clusters = 0
 
@@ -71,7 +101,10 @@ class DaskClusterManager:
         IOLoop.current().add_callback(start_clusters)
 
     async def start_cluster(
-        self, cluster_id: str = "", configuration: dict = {}
+        self,
+        cluster_id: str = "",
+        configuration: dict = {},
+        factory: str = "default",
     ) -> ClusterModel:
         """
         Start a new Dask cluster.
@@ -88,7 +121,7 @@ class DaskClusterManager:
         if not cluster_id:
             cluster_id = str(uuid4())
 
-        cluster, adaptive = await make_cluster(configuration)
+        cluster, adaptive = await make_cluster(configuration, factory=factory)
         self._n_clusters += 1
 
         # Check for a name in the config
@@ -98,15 +131,30 @@ class DaskClusterManager:
         else:
             cluster_name = configuration["name"]
 
+        if factory != "default":
+            factories: List[ClusterModel] = self.get_factories()
+            for cur_factory in factories:
+                if cur_factory["name"] == factory:
+                    kwargs: dict = cur_factory.get("kwargs", {})
+                    sitename: str = kwargs.get("sitename", "")
+                    if sitename:
+                        cluster_name = f"{cluster_name} - {sitename}"
+
         # Check if the cluster was started adaptively
         if adaptive:
             self._adaptives[cluster_id] = adaptive
 
         self._clusters[cluster_id] = cluster
         self._cluster_names[cluster_id] = cluster_name
-        return make_cluster_model(cluster_id, cluster_name, cluster, adaptive=adaptive)
+        self._factories[cluster_id] = factory
+        return make_cluster_model(
+            cluster_id, cluster_name, cluster, adaptive=adaptive, factory=factory
+        )
 
-    async def close_cluster(self, cluster_id: str) -> Union[ClusterModel, None]:
+    async def close_cluster(
+        self,
+        cluster_id: str,
+    ) -> Union[ClusterModel, None]:
         """
         Close a Dask cluster.
 
@@ -121,14 +169,21 @@ class DaskClusterManager:
         """
         cluster = self._clusters.get(cluster_id)
         if cluster:
-            await cluster.close()
+            f = cluster.close()
+            if isawaitable(f):
+                await f
             self._clusters.pop(cluster_id)
             name = self._cluster_names.pop(cluster_id)
             adaptive = self._adaptives.pop(cluster_id, None)
-            return make_cluster_model(cluster_id, name, cluster, adaptive)
-
+            factory = self._factories.get(cluster_id, "default")
+            return make_cluster_model(
+                cluster_id, name, cluster, adaptive, factory=factory
+            )
         else:
             return None
+
+    def get_factories(self) -> List[ClusterModel]:
+        return _get_factories()
 
     def get_cluster(self, cluster_id) -> Union[ClusterModel, None]:
         """
@@ -146,10 +201,11 @@ class DaskClusterManager:
         cluster = self._clusters.get(cluster_id)
         name = self._cluster_names.get(cluster_id, "")
         adaptive = self._adaptives.get(cluster_id)
+        factory = self._factories.get(cluster_id, "")
         if not cluster:
             return None
 
-        return make_cluster_model(cluster_id, name, cluster, adaptive)
+        return make_cluster_model(cluster_id, name, cluster, adaptive, factory)
 
     def list_clusters(self) -> List[ClusterModel]:
         """
@@ -164,6 +220,7 @@ class DaskClusterManager:
                 self._cluster_names[cluster_id],
                 self._clusters[cluster_id],
                 self._adaptives.get(cluster_id, None),
+                self._factories[cluster_id],
             )
             for cluster_id in self._clusters
         ]
@@ -172,13 +229,14 @@ class DaskClusterManager:
         cluster = self._clusters.get(cluster_id)
         name = self._cluster_names[cluster_id]
         adaptive = self._adaptives.pop(cluster_id, None)
+        factory = self._factories[cluster_id]
 
         # Check if the cluster exists
         if not cluster:
             return None
 
         # Check if it is actually different.
-        model = make_cluster_model(cluster_id, name, cluster, adaptive)
+        model = make_cluster_model(cluster_id, name, cluster, adaptive, factory=factory)
         if model.get("adapt") is None and model["workers"] == n:
             return model
 
@@ -186,7 +244,9 @@ class DaskClusterManager:
         t = cluster.scale(n)
         if isawaitable(t):
             await t
-        return make_cluster_model(cluster_id, name, cluster, adaptive=None)
+        return make_cluster_model(
+            cluster_id, name, cluster, adaptive=None, factory=factory
+        )
 
     def adapt_cluster(
         self, cluster_id: str, minimum: int, maximum: int
@@ -194,13 +254,14 @@ class DaskClusterManager:
         cluster = self._clusters.get(cluster_id)
         name = self._cluster_names[cluster_id]
         adaptive = self._adaptives.pop(cluster_id, None)
+        factory = self._factories[cluster_id]
 
         # Check if the cluster exists
         if not cluster:
             return None
 
         # Check if it is actually different.
-        model = make_cluster_model(cluster_id, name, cluster, adaptive)
+        model = make_cluster_model(cluster_id, name, cluster, adaptive, factory=factory)
         if (
             model.get("adapt") is not None
             and model["adapt"]["minimum"] == minimum
@@ -211,7 +272,7 @@ class DaskClusterManager:
         # Otherwise, rescale the model.
         adaptive = cluster.adapt(minimum=minimum, maximum=maximum)
         self._adaptives[cluster_id] = adaptive
-        return make_cluster_model(cluster_id, name, cluster, adaptive)
+        return make_cluster_model(cluster_id, name, cluster, adaptive, factory=factory)
 
     async def close(self):
         """Close all clusters and cleanup"""
@@ -246,6 +307,7 @@ def make_cluster_model(
     cluster_name: str,
     cluster: Cluster,
     adaptive: Union[Adaptive, None],
+    factory: str = "default",
 ) -> ClusterModel:
     """
     Make a cluster model. This is a JSON-serializable representation
@@ -268,6 +330,9 @@ def make_cluster_model(
     """
     # This would be a great target for a dataclass
     # once python 3.7 is in wider use.
+    logger.debug(
+        f"[make_cluster_model][cluster_id: {cluster_id}][cluster_name: {cluster_name}][factory: {factory}]"
+    )
     try:
         info = cluster.scheduler_info
     except AttributeError:
@@ -283,8 +348,17 @@ def make_cluster_model(
         scheduler_address=cluster.scheduler_address,
         dashboard_link=cluster.dashboard_link or "",
         workers=len(info["workers"]),
-        memory=format_bytes(sum(d["memory_limit"] for d in info["workers"].values())),
+        memory=dask.utils.format_bytes(
+            sum(d["memory_limit"] for d in info["workers"].values())
+        ),
         cores=cores,
+        factory=factory,
+        logs_port=getattr(cluster, "logs_port", None),
+        controller_address=getattr(cluster, "controller_address", ""),
+        job_status=getattr(cluster, "job_status", ""),
+        ##
+        # Local testing
+        # logs_port=getattr(cluster, "logs_port", 8181),
     )
     if adaptive:
         model["adapt"] = {"minimum": adaptive.minimum, "maximum": adaptive.maximum}
