@@ -1,6 +1,5 @@
 import {
   showErrorMessage,
-  Dialog,
   Toolbar,
   ToolbarButton,
   CommandToolbarButton
@@ -31,8 +30,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget, PanelLayout } from '@lumino/widgets';
 
 import { showScalingDialog } from './scaling';
-
-import { showCreatingDialog } from './creatingcluster';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -202,45 +199,8 @@ export class DaskClusterManager extends Widget {
    * Start a new cluster.
    */
   async start(): Promise<IClusterModel> {
-    const response = await ServerConnection.makeRequest(
-      `${this._serverSettings.baseUrl}dask/clusters/factories`,
-      { method: 'GET' },
-      this._serverSettings
-    );
-
-    if (response.status !== 200) {
-      const err = 'No response from factories';
-      void showErrorMessage(err, Dialog.cancelButton());
-
-      throw err;
-    }
-
-    let factories = await response.json();
-    console.log("start factories", factories);
-
-    if (factories.factories.length > 0) {
-      let factoryList: IClusterFactoryModel[] = [];
-      factories.factories.forEach(function (val: IClusterFactoryModel) {
-        console.log("forEach", val)
-        factoryList.push({
-          "name": val.name,
-          "selected": false,
-          "singularityImage": val.singularityImage
-        })
-      });
-      console.log("start factoryList", factoryList)
-
-      const selectedFactory = await showCreatingDialog(factoryList);
-      console.log("start", selectedFactory);
-
-      if (selectedFactory.name !== "undefined" && selectedFactory.selected !== false) {
-        const cluster = await this._launchCluster(selectedFactory.name, selectedFactory.singularityImage);
-        return cluster;
-      }
-    } else {
-      const cluster = await this._launchCluster();
-      return cluster;
-    }
+    const cluster = await this._launchCluster();
+    return cluster;
   }
 
   /**
@@ -480,14 +440,12 @@ export class DaskClusterManager extends Widget {
   /**
    * Launch a new cluster on the server.
    */
-  private async _launchCluster(factoryName: string = "default", singularityImage: string = ""): Promise<IClusterModel> {
+  private async _launchCluster(): Promise<IClusterModel> {
     this._isReady = false;
     this._registry.notifyCommandChanged(this._launchClusterId);
-    let data = JSON.stringify({ factoryName: factoryName, singularityImage: singularityImage });
-    console.log("_launchCluster", data);
     const response = await ServerConnection.makeRequest(
       `${this._serverSettings.baseUrl}dask/clusters`,
-      { method: 'PUT', body: data },
+      { method: 'PUT' },
       this._serverSettings
     );
     if (response.status !== 200) {
@@ -501,7 +459,6 @@ export class DaskClusterManager extends Widget {
     await this._updateClusterList();
     this._isReady = true;
     this._registry.notifyCommandChanged(this._launchClusterId);
-    console.log(model);
     return model;
   }
 
@@ -515,15 +472,17 @@ export class DaskClusterManager extends Widget {
       this._serverSettings
     );
     if (response.status !== 200) {
+      this._failedServerChecks++;
       const msg =
-        'Failed to list clusters: might the server extension not be installed/enabled?';
+        'Failed to list Dask clusters: might the server extension not be installed/enabled?';
       const err = new Error(msg);
-      if (!this._serverErrorShown) {
+      if (!this._hasServer && this._failedServerChecks == 5) {
         void showErrorMessage('Dask Server Error', err);
-        this._serverErrorShown = true;
       }
       throw err;
     }
+    this._hasServer = true;
+
     const data = (await response.json()) as IClusterModel[];
     this._clusters = data;
 
@@ -616,7 +575,8 @@ export class DaskClusterManager extends Widget {
     this,
     IChangedArgs<IClusterModel | undefined>
   >(this);
-  private _serverErrorShown = false;
+  private _failedServerChecks = 0;
+  private _hasServer = false;
   private _isReady = true;
   private _registry: CommandRegistry;
   private _launchClusterId: string;
@@ -726,27 +686,8 @@ function ClusterListingItem(props: IClusterListingItemProps) {
   let itemClass = 'dask-ClusterListingItem';
   itemClass = isActive ? `${itemClass} jp-mod-active` : itemClass;
 
-  let minimum: JSX.Element | null = null;
-  let maximum: JSX.Element | null = null;
-  let controller_address: JSX.Element | null = null;
-  let job_status: JSX.Element | null = null;
-  if (cluster.job_status != "") {
-    job_status = (
-      <div className="dask-ClusterListingItem-stats">
-        Status: {cluster.job_status}
-      </div>
-    );
-  }
-  if (cluster.controller_address != "") {
-    controller_address = (
-      <div
-        className="dask-ClusterListingItem-link"
-        title={cluster.controller_address}
-      >
-        Controller Address: {cluster.controller_address}
-      </div>
-    );
-  }
+  let minimum: React.JSX.Element | null = null;
+  let maximum: React.JSX.Element | null = null;
   if (cluster.adapt) {
     minimum = (
       <div className="dask-ClusterListingItem-stats">
@@ -770,7 +711,6 @@ function ClusterListingItem(props: IClusterListingItemProps) {
       }}
     >
       <div className="dask-ClusterListingItem-title">{cluster.name}</div>
-      {job_status}
       <div
         className="dask-ClusterListingItem-link"
         title={cluster.scheduler_address}
@@ -788,7 +728,6 @@ function ClusterListingItem(props: IClusterListingItemProps) {
           {cluster.dashboard_link}
         </a>
       </div>
-      {controller_address}
       <div className="dask-ClusterListingItem-stats">
         Number of Cores: {cluster.cores}
       </div>
@@ -914,38 +853,6 @@ export interface IClusterModel extends JSONObject {
    * with the minimum and maximum number of workers. Otherwise it is `null`.
    */
   adapt: null | { minimum: number; maximum: number };
-
-  /**
-   * Factory type
-   */
-  factory: string;
-
-  /**
-   * controller_address type
-   */
-  controller_address: string;
-
-  /**
-   * job_status type
-   */
-  job_status: string;
-}
-
-/**
- * An interface for a JSON-serializable representation of a cluster.
- */
-export interface IClusterFactoryModel extends JSONObject {
-  /**
-   * Factory name
-   */
-  name: string;
-
-  singularityImage: string;
-
-  /**
-   * Selected factory
-   */
-  selected: boolean;
 }
 
 /**
