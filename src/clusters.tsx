@@ -210,7 +210,8 @@ export class DaskClusterManager extends Widget {
 
     if (response.status !== 200) {
       const err = 'No response from factories';
-      void showErrorMessage(err, Dialog.cancelButton());
+      //void showErrorMessage(err, Dialog.cancelButton());
+      void showErrorMessage('Cluster Start Error', { message: err });
 
       throw err;
     }
