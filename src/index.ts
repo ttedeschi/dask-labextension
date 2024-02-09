@@ -388,7 +388,7 @@ async function activate(
       dashboard.active = active;
       dashboard.id = `dask-dashboard-${Private.id++}`;
       dashboard.title.label = `${dashboardItem.label}`;
-      dashboard.title.icon = 'dask-DaskLogo';
+      //dashboard.title.icon = 'dask-DaskLogo';
 
       labShell.add(dashboard, 'main');
       void tracker.add(dashboard); // no need to wait on this
@@ -587,7 +587,7 @@ client = Client()`;
     const cursor = editor.getCursorPosition();
     const offset = editor.getOffsetAt(cursor);
     const code = getClientCode(cluster);
-    editor.model.value.insert(offset, code);
+    //editor.model.value.insert(offset, code);
   }
 
   /**
