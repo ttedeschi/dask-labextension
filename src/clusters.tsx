@@ -1,6 +1,6 @@
 import {
   showErrorMessage,
-  Dialog,
+  //Dialog,
   Toolbar,
   ToolbarButton,
   CommandToolbarButton
