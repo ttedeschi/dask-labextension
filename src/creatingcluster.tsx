@@ -138,7 +138,8 @@ export class ClusterCreating extends React.Component<
               this.onImageChange(evt);
             }}/>
             <datalist id="ice-cream-flavors">
-              <option value="/cvmfs/unpacked.cern.ch/registry.hub.docker.com/dodasts/root-in-docker:ubuntu22-kernel-v1"> Base RDF </option>
+              <option value="/cvmfs/unpacked.cern.ch/registry.hub.docker.com/dodasts/root-in-docker:ubuntu22-kernel-v1"> Base RDF 6.27 </option>
+              <option value="/cvmfs/unpacked.cern.ch/registry.hub.docker.com/dodasts/root-in-docker:ubuntu22-kernel-v1-monitoring-boost-v1-correctionlib"> RDF 6.27 + Monitoring + Boost + Correctionlib </option>
               <option value="TODO"> Base Coffea [WIP] </option>
             </datalist>
           </div>
