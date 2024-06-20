@@ -138,9 +138,12 @@ export class ClusterCreating extends React.Component<
               this.onImageChange(evt);
             }}/>
             <datalist id="ice-cream-flavors">
-              <option value="/cvmfs/unpacked.cern.ch/registry.hub.docker.com/dodasts/root-in-docker:ubuntu22-kernel-v1"> Base RDF 6.27 </option>
+              <option value="/cvmfs/unpacked.cern.ch/registry.hub.docker.com/dodasts/root-in-docker:ubuntu22-kernel-v1"> Base ROOT 6.27 </option>
               <option value="/cvmfs/unpacked.cern.ch/registry.hub.docker.com/dodasts/root-in-docker:ubuntu22-kernel-v1-monitoring-boost-v1-correctionlib"> RDF 6.27 + Monitoring + Boost + Correctionlib </option>
-              <option value="TODO"> Base Coffea [WIP] </option>
+              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-root:latest"> Base ROOT latest </option>
+              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-coffea:latest"> Base Coffea 0.7 </option>
+              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-mkshapesrdf:latest"> mkShapesRDF </option>
+              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-pocketcoffea:latest"> PocketCoffea </option>
             </datalist>
           </div>
         </div>
