@@ -105,6 +105,22 @@ export class ClusterCreating extends React.Component<
     });
   }
 
+  onCoresChange(event: React.ChangeEvent): void { 
+    let currentSelection = (event.target as HTMLInputElement).value;
+    this.state.model.forEach((val: IClusterFactoryModel) => {
+      val.user_cores = currentSelection;
+    });
+    this.setState({ model: this.state.model });
+  }
+
+  onMemoryChange(event: React.ChangeEvent): void { 
+    let currentSelection = (event.target as HTMLInputElement).value;
+    this.state.model.forEach((val: IClusterFactoryModel) => {
+      val.user_memory = currentSelection;
+    });
+    this.setState({ model: this.state.model });
+  }
+
   /**
    * Render the component..
    */
@@ -144,6 +160,26 @@ export class ClusterCreating extends React.Component<
               <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-coffea:v0.0.5-fix5"> Base Coffea 0.7 </option>
               <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-mkshapesrdf:latest"> mkShapesRDF </option>
               <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-pocketcoffea:v0.0.5-fix5"> PocketCoffea </option>
+            </datalist>
+          </div>
+          <div className="dask-ScalingSection-item"> 
+            Worker cores:
+            <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" onChange={evt => {
+              this.onCoresChange(evt);
+            }}/>
+            <datalist id="ice-cream-flavors">
+              <option value="1"> 1 Core </option>
+              <option value="2"> 2 Cores </option>
+            </datalist>
+          </div>
+          <div className="dask-ScalingSection-item"> 
+            Worker memory:
+            <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" onChange={evt => {
+              this.onMemoryChange(evt);
+            }}/>
+            <datalist id="ice-cream-flavors">
+              <option value="2 GiB"> 2 GiB </option>
+              <option value="4 GiB"> 4 GiB </option>
             </datalist>
           </div>
         </div>
@@ -188,9 +224,9 @@ export async function showCreatingDialog(
           }
         }
       }
-      return { "name": "undefined", "selected": false, "singularityImage": "DUMMY" };
+      return { "name": "undefined", "selected": false, "singularityImage": "DUMMY", user_cores: 1, user_memory: "DUMMY"};
     } else {
-      return { "name": "undefined", "selected": false, "singularityImage": "DUMMY" };
+      return { "name": "undefined", "selected": false, "singularityImage": "DUMMY", user_cores: 1, user_memory: "DUMMY"};
     }
   });
 }

@@ -957,6 +957,9 @@ export interface IClusterFactoryModel extends JSONObject {
    * Selected factory
    */
   selected: boolean;
+  
+  user_cores: number;
+  user_memory: string;
 }
 
 /**
