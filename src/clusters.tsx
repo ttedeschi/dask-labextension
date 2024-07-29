@@ -236,7 +236,9 @@ export class DaskClusterManager extends Widget {
         factoryList.push({
           "name": val.name,
           "selected": false,
-          "singularityImage": val.singularityImage
+          "singularityImage": val.singularityImage,
+          "user_cores": val.user_cores,
+          "user_memory": val.user_memory
         })
       });
       console.log("start factoryList", factoryList)
