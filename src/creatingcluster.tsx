@@ -105,11 +105,11 @@ export class ClusterCreating extends React.Component<
     });
   }
 
-  onCoresChange(event: React.ChangeEvent): void { 
-    let currentSelection = (event.target as HTMLInputElement).value;
+  onCoresChange(event: React.ChangeEvent): void {
+    let currentCores = parseInt((event.target as HTMLInputElement).value, 10);
     this.state.model.forEach((val: IClusterFactoryModel) => {
-      val.user_cores = currentSelection;
-    });
+      val.user_cores = currentCores;
+    })
     this.setState({ model: this.state.model });
   }
 
@@ -162,15 +162,11 @@ export class ClusterCreating extends React.Component<
               <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-pocketcoffea:v0.0.5-fix5"> PocketCoffea </option>
             </datalist>
           </div>
-          <div className="dask-ScalingSection-item"> 
-            Worker cores:
-            <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" onChange={evt => {
+          <div className="dask-ScalingSection-item">
+            Worker Cores:
+            <input type="number" min="1" max="4" onChange={evt => {
               this.onCoresChange(evt);
-            }}/>
-            <datalist id="ice-cream-flavors">
-              <option value="1"> 1 Core </option>
-              <option value="2"> 2 Cores </option>
-            </datalist>
+            }} />
           </div>
           <div className="dask-ScalingSection-item"> 
             Worker memory:
