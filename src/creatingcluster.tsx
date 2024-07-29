@@ -170,10 +170,10 @@ export class ClusterCreating extends React.Component<
           </div>
           <div className="dask-ScalingSection-item"> 
             Worker memory:
-            <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" onChange={evt => {
+            <input list="ice-cream-flavors-2" id="ice-cream-choice-2" name="ice-cream-choice-2" onChange={evt => {
               this.onMemoryChange(evt);
             }}/>
-            <datalist id="ice-cream-flavors">
+            <datalist id="ice-cream-flavors-2">
               <option value="2 GiB"> 2 GiB </option>
               <option value="4 GiB"> 4 GiB </option>
             </datalist>
