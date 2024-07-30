@@ -247,7 +247,7 @@ export class DaskClusterManager extends Widget {
       console.log("start", selectedFactory);
 
       if (selectedFactory.name !== "undefined" && selectedFactory.selected !== false) {
-        const cluster = await this._launchCluster(selectedFactory.name, selectedFactory.singularityImage);
+        const cluster = await this._launchCluster(selectedFactory.name, selectedFactory.singularityImage, selectedFactory.user_cores, selectedFactory.user_memory);
         return cluster;
       }
     } else {
