@@ -493,10 +493,10 @@ export class DaskClusterManager extends Widget {
   /**
    * Launch a new cluster on the server.
    */
-  private async _launchCluster(factoryName: string = "default", singularityImage: string = ""): Promise<IClusterModel> {
+  private async _launchCluster(factoryName: string = "default", singularityImage: string = "", user_cores: number = 1, user_memory: string = ""): Promise<IClusterModel> {
     this._isReady = false;
     this._registry.notifyCommandChanged(this._launchClusterId);
-    let data = JSON.stringify({ factoryName: factoryName, singularityImage: singularityImage });
+    let data = JSON.stringify({ factoryName: factoryName, singularityImage: singularityImage, user_cores: user_cores, user_memory: user_memory });
     console.log("_launchCluster", data);
     const response = await ServerConnection.makeRequest(
       `${this._serverSettings.baseUrl}dask/clusters`,
