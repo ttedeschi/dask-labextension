@@ -53,6 +53,13 @@ async def make_cluster(configuration: dict, factory: str = "default") -> Cluster
                     kwargs.update({"singularity_wn_image": "\"" + configuration["singularity_wn_image"] + "\"" })
     
     configuration.pop("singularity_wn_image")
+    
+    kwargs["cores"] = configuration["cores"]
+    kwargs["memory"] = configuration["memory"]
+
+    configuration.pop("cores")
+    configuration.pop("memory")
+
     logger.debug(f"[make_cluster][kwargs: {kwargs}]")
     logger.debug(f"[make_cluster][configuration: {configuration}]")
 
