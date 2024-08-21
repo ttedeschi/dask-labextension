@@ -161,13 +161,13 @@ export class ClusterCreating extends React.Component<
             </datalist>
           </div>
           <div className="dask-ScalingSection-item">
-            Worker Cores:
+            Cores per HTCondor job:
             <input type="number" min="1" max="4" onChange={evt => {
               this.onCoresChange(evt);
             }} />
           </div>
           <div className="dask-ScalingSection-item"> 
-            Worker memory:
+            Memory per HTCondor job:
             <input list="ice-cream-flavors-2" id="ice-cream-choice-2" name="ice-cream-choice-2" onChange={evt => {
               this.onMemoryChange(evt);
             }}/>
