@@ -157,7 +157,7 @@ export class ClusterCreating extends React.Component<
               <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-root:v0.0.10-rc4"> Base ROOT 6.32.02 + CMSJMECalculator 0.2.0 + Correctionlib 2.6.1 </option>
               <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-coffea:v0.0.10-rc4"> Base Coffea 0.7.22 </option>
               <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-mkshapesrdf:v0.0.10-rc4"> mkShapesRDF master@1bdea0fd </option>
-              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-pocketcoffea:v0.0.10-rc4"> PocketCoffea 0.9.4  </option>
+              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-pocketcoffea:v0.0.10-rc4"> PocketCoffea 0.9.5  </option>
             </datalist>
           </div>
           <div className="dask-ScalingSection-item">
