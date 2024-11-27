@@ -154,10 +154,10 @@ export class ClusterCreating extends React.Component<
               this.onImageChange(evt);
             }}/>
             <datalist id="ice-cream-flavors">
-              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-root:v0.0.10-rc6"> Base ROOT 6.32.02 + CMSJMECalculator 0.2.0 + Correctionlib 2.6.1 </option>
-              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-coffea:v0.0.10-rc6"> Base Coffea 0.7.22 </option>
-              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-mkshapesrdf:v0.0.10-rc6"> mkShapesRDF master@1bdea0fd </option>
-              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-pocketcoffea:v0.0.10-rc6"> PocketCoffea 0.9.6  </option>
+              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-root:v0.0.11-rc3"> Base ROOT 6.32.00 + CMSJMECalculator main@1341dce26396def7860929af944d0612540fa0a5 + Correctionlib 2.6.4 </option>
+              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-coffea:v0.0.11-rc3"> Base Coffea 0.7.22 </option>
+              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-mkshapesrdf:v0.0.11-rc3"> mkShapesRDF master@2f3a5427e4dc0af4d54afb55219207e0d2b51bce </option>
+              <option value="/cvmfs/unpacked.cern.ch/ghcr.io/comp-dev-cms-ita/kernel-pocketcoffea:v0.0.11-rc3"> PocketCoffea 0.9.8  </option>
             </datalist>
           </div>
           <div className="dask-ScalingSection-item">
